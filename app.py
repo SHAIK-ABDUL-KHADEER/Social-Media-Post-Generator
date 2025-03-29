@@ -88,7 +88,7 @@ def generate():
         image_url = f"/static/images/{image_filename}"
         return jsonify({"success": True, "image_url": image_url, "refined_prompt": refined_prompt})
     else:
-        return jsonify({"success": False, "error": "Image generation failed"})
+        return jsonify({"success": False, "error": "Image generation failed due to heavy traffic, try after sometime."})
 
 
 if __name__ == "__main__":
