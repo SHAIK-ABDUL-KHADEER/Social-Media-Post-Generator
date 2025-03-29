@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>AI Image Generator</h1>
+        <p>Enter a prompt below to generate an AI image.</p>
+
+        <textarea id="promptInput" placeholder="Enter your prompt..."></textarea>
+        <button onclick="generatePost()">Generate Image</button>
+
+        <div id="loading">⏳ Generating image... Please wait</div>
+
+        <div id="result" style="display: none;">
+            <h2>Generated Image:</h2>
+            <img id="generatedImage" src="" alt="Generated Image">
+            <p id="promptDisplay"></p>
+        </div>
+
+        <h2>Generated Images</h2>
+        <div class="image-gallery">
+            {% for image in images %}
+                <div class="image-container">
+                    <img src="{{ url_for('static', filename='images/' + image.filename) }}" alt="Generated Image">
+                    <p><strong>Prompt:</strong> {{ image.prompt }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function generatePost() {
+            const prompt = document.getElementById("promptInput").value.trim();
+            if (!prompt) {
+                alert("Please enter a prompt!");
+                return;
+            }
+
+            document.getElementById("loading").style.display = "block";
+            document.getElementById("result").style.display = "none";
+
+            fetch("/generate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt: prompt })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("loading").style.display = "none";
+                if (data.success) {
+                    document.getElementById("generatedImage").src = data.image_url;
+                    document.getElementById("promptDisplay").innerHTML = "<strong>Prompt:</strong> " + data.refined_prompt;
+                    document.getElementById("result").style.display = "block";
+                    location.reload();  // Refresh to show new image at the top
+                } else {
+                    alert("Error: " + data.error);
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("Something went wrong. Please try again.");
+                document.getElementById("loading").style.display = "none";
+            });
+        }
+    </script>
+</body>
+</html>
